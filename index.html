@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="eventApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="EventController">
+    <div class="container">
+        <h1>Event Management Dashboard</h1>
+
+        
+        <h2>Manage Events</h2>
+        <form name="eventForm" ng-submit="addEvent()" novalidate>
+            <input type="text" ng-model="newEvent.name" placeholder="Event Name" required>
+            <input type="text" ng-model="newEvent.description" placeholder="Description">
+            <input type="text" ng-model="newEvent.location" placeholder="Location">
+            <input type="date" ng-model="newEvent.date" required>
+            <button type="submit">Add Event</button>
+        </form>
+        <div class="event-list" ng-if="events.length > 0">
+            <div ng-repeat="event in events track by $index">
+                <h3>{{ event.name }}</h3>
+                <p>{{ event.description }}</p>
+                <p>{{ event.location }}</p>
+                <p>{{ event.date | date:'MMM dd, yyyy' }}</p>
+                <button ng-click="deleteEvent($index)">Delete</button>
+            </div>
+        </div>
+
+    
+        <h2>Manage Attendees</h2>
+        <form name="attendeeForm" ng-submit="addAttendee()" novalidate>
+            <input type="text" ng-model="newAttendee.name" placeholder="Attendee Name" required>
+            <button type="submit">Add Attendee</button>
+        </form>
+        <div class="attendee-list" ng-if="attendees.length > 0">
+            <div ng-repeat="attendee in attendees track by $index">
+                <span>{{ attendee.name }}</span>
+                <button ng-click="deleteAttendee($index)">Delete</button>
+            </div>
+        </div>
+
+        
+        <h2>Manage Tasks</h2>
+        <form name="taskForm" ng-submit="addTask()" novalidate>
+            <input type="text" ng-model="newTask.name" placeholder="Task Name" required>
+            <input type="date" ng-model="newTask.deadline" required>
+            <select ng-model="newTask.assignedAttendee" required>
+                <option value="" disabled selected>Select Attendee</option>
+                <option ng-repeat="attendee in attendees" value="{{ attendee.name }}">
+                    {{ attendee.name }}
+                </option>
+            </select>
+            <button type="submit">Add Task</button>
+        </form>
+        <div class="task-list" ng-if="tasks.length > 0">
+            <div ng-repeat="task in tasks track by $index">
+                <p>
+                    <input type="checkbox" 
+                           ng-checked="task.status === 'Completed'" 
+                           ng-click="toggleTaskStatus($index)">
+                    <strong>{{ task.name }}</strong> 
+                    - {{ task.deadline | date:'MMM dd, yyyy' }} 
+                    (Assigned to: {{ task.assignedAttendee }}) 
+                    <span ng-class="{'completed': task.status === 'Completed'}">
+                        [{{ task.status }}]
+                    </span>
+                </p>
+                <button ng-click="deleteTask($index)">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = angular.module('eventApp', []);
+
+        app.controller('EventController', ['$scope', function ($scope) {
+            $scope.events = [];
+            $scope.attendees = [];
+            $scope.tasks = [];
+
+            
+            $scope.addEvent = function () {
+                if ($scope.newEvent) {
+                    $scope.events.push({
+                        name: $scope.newEvent.name,
+                        description: $scope.newEvent.description,
+                        location: $scope.newEvent.location,
+                        date: $scope.newEvent.date
+                    });
+                    $scope.newEvent = {};
+                }
+            };
+
+            
+            $scope.deleteEvent = function (index) {
+                $scope.events.splice(index, 1);
+            };
+
+            
+            $scope.addAttendee = function () {
+                if ($scope.newAttendee) {
+                    $scope.attendees.push({ name: $scope.newAttendee.name });
+                    $scope.newAttendee = {};
+                }
+            };
+
+           
+            $scope.deleteAttendee = function (index) {
+                $scope.attendees.splice(index, 1);
+            };
+
+           
+            $scope.addTask = function () {
+                if ($scope.newTask && $scope.newTask.assignedAttendee) {
+                    $scope.tasks.push({
+                        name: $scope.newTask.name,
+                        deadline: $scope.newTask.deadline,
+                        assignedAttendee: $scope.newTask.assignedAttendee,
+                        status: 'Pending'
+                    });
+                    $scope.newTask = {};
+                }
+            };
+
+            
+            $scope.toggleTaskStatus = function (index) {
+                $scope.tasks[index].status = 
+                    $scope.tasks[index].status === 'Completed' ? 'Pending' : 'Completed';
+            };
+
+           
+            $scope.deleteTask = function (index) {
+                $scope.tasks.splice(index, 1);
+            };
+        }]);
+    </script>
+</body>
+</html>
